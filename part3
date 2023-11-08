@@ -1,0 +1,186 @@
+#!/bin/bash
+
+# internsctl - Custom Linux Command for Interns
+# Version: v0.1.0
+
+# Usage: internsctl [OPTIONS]
+# Options:
+#   -h, --help                 Display this help message and exit
+#   -v, --version              Display the command version
+#   -o, --option <arg>         Perform a specific operation (replace with actual options)
+#   cpu getinfo                Get CPU information
+#   memory getinfo             Get memory information
+#   user create <username>     Create a new user
+#   user list                  List regular users
+#   user list --sudo-only      List users with sudo permissions
+#   file getinfo <file-name>   Get file information
+#   file getinfo [options]     Specify the type of information to retrieve
+
+# Main function
+main() {
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -v|--version)
+                show_version
+                exit 0
+                ;;
+            -o|--option)
+                shift
+                perform_operation "$1"
+                ;;
+            *)
+                echo "Invalid option: $1. Use 'internsctl --help' for usage information."
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+# Display help message
+show_help() {
+    cat <<EOF
+internsctl - Custom Linux Command for Interns
+Version: v0.1.0
+
+Usage: internsctl [OPTIONS]
+Options:
+  -h, --help                 Display this help message and exit
+  -v, --version              Display the command version
+  -o, --option <arg>         Perform a specific operation (replace with actual options)
+  cpu getinfo                Get CPU information
+  memory getinfo             Get memory information
+  user create <username>     Create a new user
+  user list                  List regular users
+  user list --sudo-only      List users with sudo permissions
+  file getinfo <file-name>   Get file information
+  file getinfo [options]     Specify the type of information to retrieve
+  Options for 'file getinfo':
+    --size, -s               Print size
+    --permissions, -p        Print file permissions
+    --owner, -o              Print file owner
+    --last-modified, -m      Print last modified timestamp
+EOF
+}
+
+# Display version
+show_version() {
+    echo "internsctl v0.1.0"
+}
+
+# Perform the specified operation
+perform_operation() {
+    local option="$1"
+    case "$option" in
+        "cpu getinfo")
+            get_cpu_info
+            ;;
+        "memory getinfo")
+            get_memory_info
+            ;;
+        "user create")
+            shift
+            create_user "$@"
+            ;;
+        "user list")
+            list_users
+            ;;
+        "user list --sudo-only")
+            list_sudo_users
+            ;;
+        "file getinfo")
+            shift
+            get_file_info "$@"
+            ;;
+        *)
+            echo "Invalid option: $option. Use 'internsctl --help' for usage information."
+            exit 1
+            ;;
+    esac
+}
+
+# Get CPU information
+get_cpu_info() {
+    lscpu
+}
+
+# Get memory information
+get_memory_info() {
+    free -h
+}
+
+# Create a new user
+create_user() {
+    local username="$1"
+    sudo useradd -m "$username"
+    sudo passwd "$username"
+}
+
+# List regular users
+list_users() {
+    cut -d: -f1 /etc/passwd
+}
+
+# List users with sudo permissions
+list_sudo_users() {
+    getent group sudo | cut -d: -f4 | tr ',' '\n'
+}
+
+# Get file information
+get_file_info() {
+    local filename="$1"
+    local size_option=false
+    local permissions_option=false
+    local owner_option=false
+    local last_modified_option=false
+
+    # Parse additional options
+    while [[ "$#" -gt 0 ]]; do
+        case $1 in
+            --size | -s)
+                size_option=true
+                ;;
+            --permissions | -p)
+                permissions_option=true
+                ;;
+            --owner | -o)
+                owner_option=true
+                ;;
+            --last-modified | -m)
+                last_modified_option=true
+                ;;
+            *)
+                echo "Invalid option: $1. Use 'internsctl file getinfo --help' for usage information."
+                exit 1
+                ;;
+        esac
+        shift
+    done
+
+    # Gather file information
+    local file_info="File: $filename"
+    if [ "$size_option" = true ]; then
+        local size_info="Size(B): $(stat -c %s "$filename")"
+        file_info="$file_info\n$size_info"
+    fi
+    if [ "$permissions_option" = true ]; then
+        local permissions_info="Access: $(stat -c %A "$filename")"
+        file_info="$file_info\n$permissions_info"
+    fi
+    if [ "$owner_option" = true ]; then
+        local owner_info="Owner: $(stat -c %U "$filename")"
+        file_info="$file_info\n$owner_info"
+    fi
+    if [ "$last_modified_option" = true ]; then
+        local last_modified_info="Modify: $(stat -c %y "$filename")"
+        file_info="$file_info\n$last_modified_info"
+    fi
+
+    echo -e "$file_info"
+}
+
+main "$@"
