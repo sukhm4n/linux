@@ -1,0 +1,42 @@
+.TH INTERNSCTL 1 "v0.1.0" "Interns Command Manual"
+
+.SH NAME
+internsctl \- Custom Linux Command for Interns
+
+.SH SYNOPSIS
+.B internsctl
+[\fIOPTIONS\fR]
+
+.SH DESCRIPTION
+This manual page documents the internsctl command, a custom Linux command for interns.
+
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Display this help message and exit.
+
+.TP
+.B \-v, \-\-version
+Display the command version.
+
+.TP
+.B \-o, \-\-option \fI<option>\fR
+Perform a specific operation. Replace \fI<option>\fR with the actual options.
+
+.SH AUTHOR
+Your Name
+
+.SH SEE ALSO
+The manual for related commands.
+
+.SH BUGS
+Report bugs to your contact information.
+
+.SH COPYRIGHT
+This is a free software.
+
+.SH VERSION
+v0.1.0
+
+.SH DATE
+November 2023
